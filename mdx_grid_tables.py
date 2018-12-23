@@ -81,14 +81,14 @@ class GridTableCell(object):
         self._height = max(1, height)
         self._colspan = max(1, colspan)
         self._rowspan = max(1, rowspan)
-    
+
     def __str__(self):
         """
         For simplicity, the string representation is also the python code
         representation.
         """
         return self.__repr__()
-    
+
     def __repr__(self):
         """
         This is the python representation of the cell. If ran with eval, the
@@ -101,7 +101,7 @@ class GridTableCell(object):
                              repr(self._width), repr(self._height),
                              repr(self._colspan), repr(self._rowspan),
                              repr(self.text))
-    
+
     def __eq__(self, other):
         """
         Checks if another cell is equivalent to this one.
@@ -112,14 +112,14 @@ class GridTableCell(object):
                 self.height == other.height and
                 self.colspan == other.colspan and
                 self.rowspan == other.rowspan)
-    
+
     @property
     def start_row(self):
         """
         Returns the starting row for the cell.
         """
         return self._start_row
-    
+
     @start_row.setter
     def start_row(self, value):
         """
@@ -127,14 +127,14 @@ class GridTableCell(object):
         depending on which is larger.
         """
         self._start_row = max(0, value)
-    
+
     @property
     def start_col(self):
         """
         Returns the starting column for the cell.
         """
         return self._start_col
-    
+
     @start_col.setter
     def start_col(self, value):
         """
@@ -142,14 +142,14 @@ class GridTableCell(object):
         in, depending on which is larger.
         """
         self._start_col = max(0, value)
-    
+
     @property
     def width(self):
         """
         Returns the width (in number of characters) of the cell.
         """
         return self._width
-    
+
     @width.setter
     def width(self, value):
         """
@@ -157,14 +157,14 @@ class GridTableCell(object):
         value passed in, depending on which is larger.
         """
         self._width = max(1, value)
-    
+
     @property
     def height(self):
         """
         Returns the height (in number of characters) of the cell.
         """
         return self._height
-    
+
     @height.setter
     def height(self, value):
         """
@@ -172,14 +172,14 @@ class GridTableCell(object):
         the value passed in, depending on which is larger.
         """
         self._height = max(1, value)
-    
+
     @property
     def colspan(self):
         """
         Returns the number of columns that this cell spans.
         """
         return self._colspan
-    
+
     @colspan.setter
     def colspan(self, value):
         """
@@ -187,14 +187,14 @@ class GridTableCell(object):
         value passed in, depending on which is larger.
         """
         self._colspan = max(1, value)
-    
+
     @property
     def rowspan(self):
         """
         Returns the number of rows that this cell spans.
         """
         return self._rowspan
-    
+
     @rowspan.setter
     def rowspan(self, value):
         """
@@ -202,7 +202,7 @@ class GridTableCell(object):
         passed in, depending on which is larger.
         """
         self._rowspan = max(1, value)
-    
+
     @property
     def end_row(self):
         """
@@ -211,7 +211,7 @@ class GridTableCell(object):
         cell.
         """
         return self._start_row + self._height
-    
+
     @property
     def end_col(self):
         """
@@ -232,7 +232,7 @@ class GridTableRow(object):
         self._start_row = start_row
         self._height = None
         self.is_header = is_header
-    
+
     def add_cell(self, cell):
         """
         Adds a cell to the appropriate position in the row based on where its
@@ -253,7 +253,7 @@ class GridTableRow(object):
         if self._height is None or relative_height < self._height:
             self._height = relative_height
         return True
-    
+
     def get_all_cells(self):
         """
         A generator which returns all cells within the row. I use a generator
@@ -262,7 +262,7 @@ class GridTableRow(object):
         """
         for cell in self._cells:
             yield cell
-    
+
     def get_all_cells_taller_than_this_row(self):
         """
         A generator that gets all cells that are taller than this row (which
@@ -271,7 +271,7 @@ class GridTableRow(object):
         for cell in self._cells:
             if cell.start_row + cell.height > self._start_row + self._height:
                 yield cell
-    
+
     def get_all_cells_starting_at_this_row(self):
         """
         A generator that gets all cells that start at this row (which means
@@ -280,7 +280,7 @@ class GridTableRow(object):
         for cell in self._cells:
             if cell.start_row == self._start_row:
                 yield cell
-    
+
     def get_cell_starting_at_this_row_at_column(self, column):
         """
         Returns the cell (or None if no cell is found) that starts in this row,
@@ -292,7 +292,7 @@ class GridTableRow(object):
             elif cell.start_col > column:
                 break
         return None
-    
+
     @property
     def height(self):
         """
@@ -300,14 +300,14 @@ class GridTableRow(object):
         equal to the height of the shortest cell in this row.
         """
         return self._height
-    
+
     @property
     def start_row(self):
         """
         The index of the line in the block at which this row starts.
         """
         return self._start_row
-        
+
     @property
     def end_row(self):
         """
@@ -357,7 +357,7 @@ class GridTable(object):
         self._start_col = start_col
         self._width = width
         self._height = height
-    
+
     def new_row(self, is_header=False, header_location=-1):
         """
         Creates a new row which starts at the end of the previous row. Any
@@ -375,14 +375,14 @@ class GridTable(object):
         Adds a cell to the last row in the table.
         """
         return self._rows[-1].add_cell(cell)
-    
+
     def get_all_rows(self):
         """
         A generator that returns all rows in the table.
         """
         for row in self._rows:
             yield row
-    
+
     def get_all_cells_starting_at_column(self, column):
         """
         A generator which yields all cells in all rows that start at a specific
@@ -392,7 +392,7 @@ class GridTable(object):
             cell = row.get_cell_starting_at_this_row_at_column(column)
             if cell is not None:
                 yield cell
-    
+
     def calculate_colspans(self):
         """
         After all cells are added to the table, this function will calculate
@@ -419,7 +419,7 @@ class GridTable(object):
                     del cells[i]
             start_col = end_col
             end_col = self.end_col
-    
+
     @property
     def start_row(self):
         """
@@ -427,7 +427,7 @@ class GridTable(object):
         starts at.
         """
         return self._start_row
-    
+
     @property
     def start_col(self):
         """
@@ -435,21 +435,21 @@ class GridTable(object):
         table starts at.
         """
         return self._start_col
-    
+
     @property
     def width(self):
         """
         Returns the width (in number of characters) of the table.
         """
         return self._width
-    
+
     @property
     def height(self):
         """
         Returns the height (in number of characters) of the table.
         """
         return self._height
-    
+
     @property
     def end_row(self):
         """
@@ -457,7 +457,7 @@ class GridTable(object):
         ends at. It is equal to the starting row plus the height.
         """
         return self._start_row + self._height
-    
+
     @property
     def end_col(self):
         """
@@ -610,7 +610,7 @@ class GridTableProcessor(markdown.blockprocessors.BlockProcessor):
         if block[start_row][start_col] != '+':
             return None
         return self._scan_right(block, start_row, start_col)
-    
+
     def _scan_right(self, block, start_row, start_col):
         """
         Scans right until it gets to a '+' sign. It then starts scanning down
@@ -631,7 +631,7 @@ class GridTableProcessor(markdown.blockprocessors.BlockProcessor):
             else:
                 break
         return None
-    
+
     def _scan_down(self, block, start_row, start_col, cur_col):
         """
         Scans down until it gets to a '+' sign. It then starts scanning left
@@ -653,7 +653,7 @@ class GridTableProcessor(markdown.blockprocessors.BlockProcessor):
             else:
                 break
         return None
-    
+
     def _scan_left(self, block, start_row, start_col, cur_col, cur_row):
         """
         Scans left until it gets to a '+' sign. It then starts scanning up to
@@ -675,7 +675,7 @@ class GridTableProcessor(markdown.blockprocessors.BlockProcessor):
             else:
                 break
         return None
-    
+
     def _scan_up(self, block, start_row, start_col, cur_col, cur_row, check_col):
         """
         Scans up until it gets to a '+' sign. If the '+' sign is in the
@@ -702,7 +702,7 @@ class GridTableProcessor(markdown.blockprocessors.BlockProcessor):
             else:
                 break
         return None
-    
+
     def _gather_text(self, block, start_row, start_col, end_row, end_col):
         """
         Gathers the text within the cell defined by the start row, start
