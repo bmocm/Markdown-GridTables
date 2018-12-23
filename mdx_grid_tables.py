@@ -463,6 +463,10 @@ class GridTableProcessor(markdown.blockprocessors.BlockProcessor):
     """
     _header_regex = r'\+=+(\+=+)*\+'
 
+    def __init__(self, parser):
+        super(GridTableProcessor, self).__init__(parser)
+        self.ignore_next_block = False
+
     def test(self, parent, block):
         """
         This function tests to see if the block of text passed in is a table or
@@ -471,6 +475,9 @@ class GridTableProcessor(markdown.blockprocessors.BlockProcessor):
         on both the top an bottom right corners, and has a '|' at the beginning
         and end of the first and last rows.
         """
+        if self.ignore_next_block:
+            self.ignore_next_block = False
+            return False
         rows = [r.strip() for r in block.split('\n')]
         return (len(rows) > 2 and rows[0][:2] == "+-" and rows[0][-2:] == "-+"
                 and rows[1][0] == '|' and rows[1][-1] == '|'
@@ -487,27 +494,14 @@ class GridTableProcessor(markdown.blockprocessors.BlockProcessor):
         Otherwise, it is rendered as a table with the appropriate row and
         column spans.
         """
-        orig_block = [r.strip() for r in blocks.pop(0).split('\n')]
-        body_block = orig_block[:]
+        body_block = [r.strip() for r in blocks[0].split('\n')]
         success, body = self._get_all_cells(body_block)
         if not success:
-            self._render_as_block(parent, '\n'.join(orig_block))
+            self.ignore_next_block = True
             return
+        del blocks[0]
         table = etree.SubElement(parent, 'table')
         self._render_rows(body, table)
-
-    def _render_as_block(self, parent, text):
-        """
-        Renders a table as a block of text instead of a table. This isn't done
-        correctly, since the serialized items are serialized again, but I'll
-        fix this later.
-        """
-        trans_table = [(' ', '&nbsp;'), ('<', '&lt;'), ('>', '&gt;'), ('&', '&amp;')]
-        for from_char, to_char in trans_table:
-            text = text.replace(from_char, to_char)
-        div = etree.SubElement(parent, 'div')
-        div.set('class', 'grid-table-error')
-        div.text = text
 
     def _header_exists(self, block):
         """
