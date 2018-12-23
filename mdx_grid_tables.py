@@ -479,6 +479,8 @@ class GridTableProcessor(markdown.blockprocessors.BlockProcessor):
             self.ignore_next_block = False
             return False
         rows = [r.strip() for r in block.split('\n')]
+        if len(set([len(r) for r in rows])) != 1: # all rows need the same length
+            return False
         return (len(rows) > 2 and rows[0][:2] == "+-" and rows[0][-2:] == "-+"
                 and rows[1][0] == '|' and rows[1][-1] == '|'
                 and rows[-2][0] == '|' and rows[-2][-1] == '|'
