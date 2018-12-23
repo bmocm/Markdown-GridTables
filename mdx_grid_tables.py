@@ -315,26 +315,7 @@ class GridTableRow(object):
         equal to the starting row plus the height.
         """
         return self._start_row + self._height
-    
-    @property
-    def start_col(self):
-        """
-        The column in the block at which this row starts. If a cell starts at
-        this row, that cell's start column is returned. Otherwise, the furthest
-        right connected cell's (starting from the left) end column is returned.
-        """
-        if len(self._cells) == 0:
-            return 0
-        left_cell = None
-        for cell in self._cells:
-            if cell.start_row == self.start_row:
-                return cell.start_col
-            if left_cell is None or left_cell.end_col == cell.start_col:
-                left_cell = cell
-            else:
-                break
-        return left_cell.end_col
-    
+
     @property
     def end_col(self):
         """
@@ -345,9 +326,14 @@ class GridTableRow(object):
             return 0
         return self._cells[-1].end_col
 
+    def get_cell_with_start_col(self, start_col):
+        for cell in self._cells:
+            if cell.start_col == start_col:
+                return cell
+
 class GridTable(object):
     """
-    A grid table in its entirity. The start row and start column should be 0, 0
+    A grid table in its entirety. The start row and start column should be 0, 0
     but can be set differently depending on the block. The width and height are
     how many characters wide and high the table is.
     """
@@ -368,8 +354,8 @@ class GridTable(object):
         for cell in self._rows[-2].get_all_cells_taller_than_this_row():
             cell.rowspan += 1
             self._rows[-1].add_cell(cell)
-        return self._rows[-1].start_row, self._rows[-1].start_col
-    
+        return self._rows[-1].start_row
+
     def add_cell(self, cell):
         """
         Adds a cell to the last row in the table.
@@ -589,17 +575,20 @@ class GridTableProcessor(markdown.blockprocessors.BlockProcessor):
         header_exists, header_location, block = self._header_exists(block)
         table = GridTable(start_row, start_col, len(block)-1, len(block[0])-1, header_exists)
         while start_row < len(block)-1:
-            new_cell = self._scan_cell(block, start_row, start_col)
-            if new_cell is None or not table.add_cell(new_cell):
-                return False, table
-            if start_col + new_cell.width >= len(block[start_row])-1:
+            cell = table._rows[-1].get_cell_with_start_col(start_col)
+            if cell is None:
+                cell = self._scan_cell(block, start_row, start_col)
+                if cell is None or not table.add_cell(cell):
+                    return False, table
+            if start_col + cell.width >= len(block[start_row])-1:
                 is_header = header_exists and table._rows[-1].end_row < header_location
-                start_row, start_col = table.new_row(is_header=is_header)
+                start_row = table.new_row(is_header=is_header)
+                start_col = 0
             else:
-                start_col += new_cell.width
+                start_col += cell.width
         table.calculate_colspans()
         return True, table
-    
+
     def _scan_cell(self, block, start_row, start_col):
         """
         Starts scanning for a specific cell by checking the starting character
