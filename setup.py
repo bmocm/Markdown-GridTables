@@ -1,9 +1,10 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
-    name='Markdown-GridTables',
+    name='BMO-Markdown-GridTables',
+    version='0.0.2',
     description='ASCII tables to HTML tables.',
-    py_modules=['mdx_grid_tables'],
+    py_modules=['grid_tables'],
     install_requires=['markdown'],
     author='smartboyathome',
     author_email='edit@this.com',
